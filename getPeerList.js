@@ -21,7 +21,7 @@ function getPeerList(input) {
 				peerArr.push(doAnnounceGetPeers(infoHash, torrent.announce[i]))
 			}
 			peerArr = await Promise.all(peerArr);
-			let totalPeers = new Set([].concat.apply([], peerArr))
+			let totalPeers = [...new Set([].concat.apply([], peerArr))]
 			resolve(totalPeers)
 		})
 	})
