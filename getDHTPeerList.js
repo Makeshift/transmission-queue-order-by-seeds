@@ -3,7 +3,6 @@ const config = require('./config').dht;
 
 module.exports = function(torrent) {
 	return new Promise(async (resolve, reject) => {
-		console.log("Starting DHT discovery")
 		let dht = new DHT();
 		dht.lookup(torrent.infoHash);
 		let peers = [];
@@ -13,7 +12,7 @@ module.exports = function(torrent) {
 		dht.listen(await genRandomPort());
 		setTimeout(() => {
 			dht.destroy(() => {
-				resolve(peers);
+				resolve(peers.length);
 			})
 		}, config.waitTime)
 	})

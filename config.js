@@ -4,6 +4,10 @@ let config = {
 		portStart: 	process.env["dhtPortStart"] 				|| 10000, //Random start port range for listening
 		portEnd: 	process.env["dhtPortEnd"] 					|| 60000 //Random end port range for listening
 	},
+	tracker: {
+		waitTime:   process.env["trackerWaitTime"]              || 10000, //Time in ms to wait for a UDP tracker to respond
+		//uniquePeers:process.env["transmissionOrderUniquePeers"] || true //true: counts peers based on IP, ignores ports; false: includes ports, so clients announcing on multiple ports will be counted as multiple peers
+	},
 	transmission: {
 		protocol: 	process.env["transmissionProtocol"] 		|| "http:", //or https
 		host: 		process.env["transmissionHost"] 			|| "",
@@ -12,7 +16,7 @@ let config = {
 		username: 	process.env["transmissionUsername"] 		|| "",
 		password: 	process.env["transmissionPassword"] 		|| ""
 	},
-	uniquePeers: 	process.env["transmissionOrderUniquePeers"] || true //true: counts peers based on IP, ignores ports; false: includes ports, so clients announcing on multiple ports will be counted as multiple peers
+	
 }
 
 //Used to override transmission config in development
