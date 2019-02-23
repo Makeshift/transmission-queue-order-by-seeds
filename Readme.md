@@ -10,10 +10,9 @@ This script will announce to **every single tracker** your Transmission is conne
 
 - ~~Read torrent and get peer list from tracker announce~~
 - IP hiding when searching for peers
-- DHT peer search
-- PeX peer search
-- UPnP support for auto-discovery
-- Get torrent/tracker list from Transmission
+- ~~DHT peer search~~
+- ~~Get torrent/tracker list from Transmission~~
+- UDP tracker support
 - Handling mass-search without crashing
 - Transmission queue management
 

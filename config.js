@@ -5,7 +5,7 @@ let config = {
 		portEnd: 	process.env["dhtPortEnd"] 					|| 60000 //Random end port range for listening
 	},
 	transmission: {
-		protocol: 	process.env["transmissionProtocol"] 		|| "http", //or https
+		protocol: 	process.env["transmissionProtocol"] 		|| "http:", //or https
 		host: 		process.env["transmissionHost"] 			|| "",
 		path: 		process.env["transmissionPath"] 			|| "/transmission/rpc",
 		port: 		process.env["transmissionPort"] 			|| 9091,
