@@ -9,12 +9,12 @@ This script will announce to **every single tracker** your Transmission is conne
 ## TODO
 
 - ~~Read torrent and get peer list from tracker announce~~
-- IP hiding when searching for peers
+- IP hiding when searching for peers (If possible?)
 - ~~DHT peer search~~
 - ~~Get torrent/tracker list from Transmission~~
 - ~~UDP tracker support~~ << Kind of. Currently unable to get a real peer list, so uniques aren't correctly calculated. If anybody can tell me why my announce isn't working, that would be great
-- Handling mass-search without crashing
-- Transmission queue management
+- ~~Handling mass-search without crashing~~
+- ~~Transmission queue management~~
 - Disable DHT for private trackers
 - Proper logging
 

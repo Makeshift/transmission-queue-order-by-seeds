@@ -20,8 +20,13 @@ function getPeerList(torrent) {
 				}
 			}
 			[peerArr = await Promise.all(peerArr), extraCount = await Promise.all(extraCount)];
-			let totalPeers = getUniqueCount(peerArr) + extraCount.reduce((a, v) => a + v);
-			console.log(totalPeers);
+			let reduceCount;
+			try {
+				reduceCount = extraCount.reduce((a, v) => a + v)
+			} catch(e) {
+				reduceCount = 0;
+			}
+			let totalPeers = getUniqueCount(peerArr) + reduceCount;
 			resolve(totalPeers)
 	})
 }
@@ -42,25 +47,38 @@ function getUniqueCount(peers) {
 
 function doAnnounceGetPeers(hash, tracker) {
 	return new Promise ((resolve, reject) => {
-		let default_qs = "&peer_id=12345678901234567890&port=1&uploaded=0&downloaded=0&left=0&event=started&compact=1&numwant=1000&ip=172.16.0.1"
-		request({
-			url: `${tracker}?info_hash=${hash}${default_qs}`,
-			method: "GET",
-			encoding: null
-		}, function(err, res, body) {
-			if (err) {
-				console.log(`Tracker ${tracker} is dead, skipping...`)
-				resolve([]);
-			} else {
-				resolve(parsePeers(bencode.decode(body).peers));
-			}
-			console.log(done++ + "/" + totalCount);
-		});
+		try {
+			let default_qs = "&peer_id=12345678901234567890&port=1&uploaded=0&downloaded=0&left=0&event=started&compact=1&numwant=1000&ip=172.16.0.1"
+			let req = request({
+				url: `${tracker}?info_hash=${hash}${default_qs}`,
+				method: "GET",
+				encoding: null,
+				timeout: config.waitTime
+			}, function(err, res, body) {
+				if (err) {
+					console.log(`Tracker ${tracker} is dead, skipping...`)
+					resolve([]);
+				} else {
+					try {
+						resolve(parsePeers(bencode.decode(body).peers));
+					} catch(e) {
+						resolve([])
+					} 
+				}
+				//console.log(done++ + "/" + totalCount);
+			});
+			req.on('error', function() {
+				resolve([])
+			})
+		} catch(e) {
+			resolve([])
+		} 
 	});
 }
 
 function doAnnounceGetPeersUDP(hash, tracker) {
 	return new Promise(async (resolve) => {
+		try {
 		let preHost = tracker.split("udp://")[1];
 		let host = preHost.split(":")[0];
 		let port = preHost.split(":")[1];
@@ -72,7 +90,10 @@ function doAnnounceGetPeersUDP(hash, tracker) {
 		const udpserver = dgram.createSocket('udp4');
 		resolve(await getPeersCountFromUDPTracker(udpserver, hash, host, port))
 		udpserver.close();
-		console.log(done++ + "/" + totalCount);
+		//console.log(done++ + "/" + totalCount);
+		} catch(e) {
+			resolve(0);
+		}
 	})
 }
 
@@ -165,13 +186,17 @@ function scrapeTorrent(server, host, port, hash, low, high, transactionId) {
 // }
 
 function parsePeers(peers) {
-	let p = Buffer.from(peers, 'latin1');
-	let peerList = [];
-	for (let i = 0; i < p.length; i += 6) {
-		let peer = `${p[i]}.${p[i+1]}.${p[i+2]}.${p[i+3]}:${(p[i + 4] << 8 | p[i + 5])}`
-		peerList.push(peer);
+	try {
+		let p = Buffer.from(peers, 'latin1');
+		let peerList = [];
+		for (let i = 0; i < p.length; i += 6) {
+			let peer = `${p[i]}.${p[i+1]}.${p[i+2]}.${p[i+3]}:${(p[i + 4] << 8 | p[i + 5])}`
+			peerList.push(peer);
+		}
+		return peerList;
+	} catch(e) {
+		return [];
 	}
-	return peerList;
 }
 
 module.exports = getPeerList;

@@ -1,8 +1,12 @@
 let config = {
+	concurrency: 	process.env["globalConcurrency"] 			|| 300, //How many concurrent torrents we should be processing
+	removeNoPeers:  process.env["globalRemoveNoPeers"]			|| true,
+	pauseAllSeeding:process.env["globalPauseAllSeeding"]		|| true,
 	dht: {
-		waitTime: 	process.env["dhtWaitTime"] 					|| 10000, //Time in ms to wait for DHT per torrent
-		portStart: 	process.env["dhtPortStart"] 				|| 10000, //Random start port range for listening
-		portEnd: 	process.env["dhtPortEnd"] 					|| 60000 //Random end port range for listening
+		waitTime: 	process.env["dhtWaitTime"] 					|| 10000, //Time in ms to wait for DHT per concurrent set
+		portStart: 	process.env["dhtPortStart"] 				|| 50000, //Random start port range for listening
+		portEnd: 	process.env["dhtPortEnd"] 					|| 55000, //Random end port range for listening
+		concurrency:process.env["dhtConcurrency"]				|| 1000 //How much you want to hammer DHT
 	},
 	tracker: {
 		waitTime:   process.env["trackerWaitTime"]              || 10000, //Time in ms to wait for a UDP tracker to respond
@@ -15,8 +19,7 @@ let config = {
 		port: 		process.env["transmissionPort"] 			|| 9091,
 		username: 	process.env["transmissionUsername"] 		|| "",
 		password: 	process.env["transmissionPassword"] 		|| ""
-	},
-	
+	}
 }
 
 //Used to override transmission config in development
