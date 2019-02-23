@@ -1,0 +1,18 @@
+{
+  "name": "transmission-queue-order-by-seeds",
+  "version": "0.1.0",
+  "description": "Automatically orders torrents by number of seeds in Transmission, so more popular torrents get downloaded first.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Makeshift",
+  "license": "ISC",
+  "dependencies": {
+    "bencode": "^2.0.1",
+    "convert-string": "^0.1.0",
+    "parse-torrent": "^6.1.2",
+    "request": "^2.88.0",
+    "transmission-api": "0.0.1"
+  }
+}
