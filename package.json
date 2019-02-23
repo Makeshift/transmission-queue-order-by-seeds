@@ -1,6 +1,6 @@
 {
   "name": "transmission-queue-order-by-seeds",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Automatically orders torrents by number of seeds in Transmission, so more popular torrents get downloaded first.",
   "main": "index.js",
   "scripts": {
