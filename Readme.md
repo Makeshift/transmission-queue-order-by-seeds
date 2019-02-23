@@ -12,7 +12,7 @@ This script will announce to **every single tracker** your Transmission is conne
 - IP hiding when searching for peers
 - DHT peer search
 - PeX peer search
-- LSD peer search
+- UPnP support for auto-discovery
 - Get torrent/tracker list from Transmission
 - Handling mass-search without crashing
 - Transmission queue management
