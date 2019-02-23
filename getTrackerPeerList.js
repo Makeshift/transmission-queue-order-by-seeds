@@ -2,7 +2,8 @@ const bencode = require('bencode');
 const request = require('request');
 const dgram = require('dgram');
 const config = require('./config').tracker;
-
+let totalCount = 0;
+let done = 0;
 function getPeerList(torrent) {
 	return new Promise(async (resolve, reject) => {
 			let peerArr = [];
@@ -10,14 +11,15 @@ function getPeerList(torrent) {
 			for (let i = 0; i < torrent.announce.length; i++) {
 				if (torrent.announce[i].includes("udp://")) {
 					extraCount.push(doAnnounceGetPeersUDP(torrent.infoHash, torrent.announce[i]))
+					totalCount++;
 				} else if (torrent.announce[i].includes("http://") || torrent.announce[i].includes("https://")) {
 					peerArr.push(doAnnounceGetPeers(torrent.encodedInfoHash, torrent.announce[i]))
+					totalCount++;
 				} else {
 					console.log(`${torrent.announce[i]}: Unknown tracker type! Skipping`)
 				}
 			}
 			[peerArr = await Promise.all(peerArr), extraCount = await Promise.all(extraCount)];
-
 			let totalPeers = getUniqueCount(peerArr) + extraCount.reduce((a, v) => a + v);
 			console.log(totalPeers);
 			resolve(totalPeers)
@@ -52,6 +54,7 @@ function doAnnounceGetPeers(hash, tracker) {
 			} else {
 				resolve(parsePeers(bencode.decode(body).peers));
 			}
+			console.log(done++ + "/" + totalCount);
 		});
 	});
 }
@@ -69,6 +72,7 @@ function doAnnounceGetPeersUDP(hash, tracker) {
 		const udpserver = dgram.createSocket('udp4');
 		resolve(await getPeersCountFromUDPTracker(udpserver, hash, host, port))
 		udpserver.close();
+		console.log(done++ + "/" + totalCount);
 	})
 }
 

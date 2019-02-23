@@ -9,7 +9,7 @@ let config = {
 		//uniquePeers:process.env["transmissionOrderUniquePeers"] || true //true: counts peers based on IP, ignores ports; false: includes ports, so clients announcing on multiple ports will be counted as multiple peers
 	},
 	transmission: {
-		protocol: 	process.env["transmissionProtocol"] 		|| "http:", //or https
+		ssl: 	process.env["transmissionSsl"] 					|| false, //or https
 		host: 		process.env["transmissionHost"] 			|| "",
 		path: 		process.env["transmissionPath"] 			|| "/transmission/rpc",
 		port: 		process.env["transmissionPort"] 			|| 9091,

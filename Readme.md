@@ -20,4 +20,14 @@ This script will announce to **every single tracker** your Transmission is conne
 
 ## How to use
 
-Currently, this project is too early in its development to be used.
+Currently, this project is quite early in development, but does work (albeit with some janky logic in places).
+
+- Clone repository
+- `npm install`
+- Update `config.js` with your Transmission details
+- run `node index.js`
+
+The script will then:
+- Grab your list of torrents from Tranmission
+- Announce itself on every tracker in your torrents to get a count of peers (TODO: Proper unique tracking with UDP trackers)
+- Sort your Transmission queue to be in popularity order

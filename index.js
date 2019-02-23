@@ -2,7 +2,6 @@ const parseTorrent = require('./parseTorrent');
 const getTrackerPeerList = require('./getTrackerPeerList');
 const getDHTPeerList = require('./getDHTPeerList');
 const transmission = require('./transmission');
-const config = require('./config');
 
 function getPeerCount(torrent) {
 	return new Promise(async (resolve, reject) => {
@@ -17,13 +16,17 @@ function getPeerCount(torrent) {
 
 async function sortAllTorrents() {
 	let torrents = await transmission.getTorrents();
+	console.log("Got all torrents, grabbing peer counts")
 	let peerCounters = [];
 	for (let i = 0; i < torrents.length; i++) {
 		peerCounters.push(getPeerCount(torrents[i]));
 	}
 	peerCounters = await Promise.all(peerCounters);
+	console.log("Got all peer counts, sorting")
 	let byPeerOrder = peerCounters.sort((a, b) => {return a.totalPeers < b.totalPeers})
 	console.log(byPeerOrder);
+	await transmission.sortQueue(byPeerOrder);
+	console.log("All done.")
 }
 
 
