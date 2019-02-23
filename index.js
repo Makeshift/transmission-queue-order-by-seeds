@@ -2,6 +2,7 @@ const parseTorrent = require('./parseTorrent');
 const getTrackerPeerList = require('./getTrackerPeerList');
 const getDHTPeerList = require('./getDHTPeerList');
 const transmission = require('./transmission');
+const config = require('./config');
 
 async function getPeers(torrent) {
 	let parsedTorrent = await parseTorrent(torrent);
@@ -14,15 +15,15 @@ async function getPeers(torrent) {
 	console.log("Final peer length: " + cleanPeerList.length);
 }
 
-async function getTorrents() {
 
-}
 
 function cleanPeers(arr) {
 	let cat = [].concat.apply([], arr);
-	for (let i = 0; i < cat.length; i++) {
-		cat[i] = cat[i].split(":")[0]
+	if (config.uniquePeers) {
+		for (let i = 0; i < cat.length; i++) {
+			cat[i] = cat[i].split(":")[0]
+		}
+		cat = [...new Set(cat)];
 	}
-	let fin = [...new Set(cat)];
-	return fin;
+	return cat;
 }

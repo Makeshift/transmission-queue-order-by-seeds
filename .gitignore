@@ -1,4 +1,5 @@
-*.torrent 
+*.torrent
+config.overrides.js
 # Logs
 logs
 *.log
