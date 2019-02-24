@@ -71,5 +71,5 @@ async function test() {
 }
 
 
-test();
-//sortAllTorrents();
+//test();
+sortAllTorrents();

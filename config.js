@@ -1,11 +1,11 @@
 let config = {
-	concurrency: 	process.env["globalConcurrency"] 			|| 300, //How many concurrent torrents we should be processing
+	concurrency: 	process.env["globalConcurrency"] 			|| 250, //How many concurrent torrents we should be processing
 	removeNoPeers:  process.env["globalRemoveNoPeers"]			|| true,
 	pauseAllSeeding:process.env["globalPauseAllSeeding"]		|| true,
 	dht: {
 		waitTime: 	process.env["dhtWaitTime"] 					|| 10000, //Time in ms to wait for DHT per concurrent set
-		portStart: 	process.env["dhtPortStart"] 				|| 50000, //Random start port range for listening
-		portEnd: 	process.env["dhtPortEnd"] 					|| 55000, //Random end port range for listening
+		portStart: 	process.env["dhtPortStart"] 				|| 40500, //Random start port range for listening
+		portEnd: 	process.env["dhtPortEnd"] 					|| 41000, //Random end port range for listening
 		concurrency:process.env["dhtConcurrency"]				|| 1000 //How much you want to hammer DHT
 	},
 	tracker: {
