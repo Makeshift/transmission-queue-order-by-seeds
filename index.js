@@ -4,15 +4,13 @@ const getDHTPeerList = require('./getDHTPeerList');
 const transmission = require('./transmission');
 const config = require('./config');
 
-function getPeerCount(torrent) {
-	return new Promise(async (resolve, reject) => {
-		let parsedTorrent = await parseTorrent(torrent.magnet);
-		let dhtPeers, trackerPeers;
-		[dhtPeers = await getDHTPeerList(parsedTorrent), trackerPeers = await getTrackerPeerList(parsedTorrent)]
-		console.log(`Got total peers for torrent ${torrent.id}: ${(dhtPeers + trackerPeers)}`);
-		torrent.totalPeers = dhtPeers + trackerPeers;
-		resolve(torrent)
-	})
+async function getPeerCount(torrent) {
+	let parsedTorrent = await parseTorrent(torrent.magnet);
+	let dhtPeers, trackerPeers;
+	[dhtPeers = await getDHTPeerList(parsedTorrent), trackerPeers = await getTrackerPeerList(parsedTorrent)]
+	console.log(`Got total peers for torrent ${torrent.id}: ${(dhtPeers + trackerPeers)}`);
+	torrent.totalPeers = dhtPeers + trackerPeers;
+	return torrent
 }
 
 async function sortAllTorrents() {
@@ -53,13 +51,10 @@ async function sortAllTorrents() {
 }
 
 
-function sortByPeerAmount(arr) {
-	return new Promise((resolve) => {
-		arr.sort((a, b) => {
-			return b.totalPeers - a.totalPeers;
-		});
-		resolve(arr);
-	})
+async function sortByPeerAmount(arr) {
+	return arr.sort((a, b) => {
+		return b.totalPeers - a.totalPeers;
+	});
 }
 
 async function test() {

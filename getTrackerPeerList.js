@@ -3,32 +3,30 @@ const request = require('request');
 const dgram = require('dgram');
 const config = require('./config').tracker;
 let totalCount = 0;
-let done = 0;
-function getPeerList(torrent) {
-	return new Promise(async (resolve, reject) => {
-			let peerArr = [];
-			let extraCount = [];
-			for (let i = 0; i < torrent.announce.length; i++) {
-				if (torrent.announce[i].includes("udp://")) {
-					extraCount.push(doAnnounceGetPeersUDP(torrent.infoHash, torrent.announce[i]))
-					totalCount++;
-				} else if (torrent.announce[i].includes("http://") || torrent.announce[i].includes("https://")) {
-					peerArr.push(doAnnounceGetPeers(torrent.encodedInfoHash, torrent.announce[i]))
-					totalCount++;
-				} else {
-					console.log(`${torrent.announce[i]}: Unknown tracker type! Skipping`)
-				}
-			}
-			[peerArr = await Promise.all(peerArr), extraCount = await Promise.all(extraCount)];
-			let reduceCount;
-			try {
-				reduceCount = extraCount.reduce((a, v) => a + v)
-			} catch(e) {
-				reduceCount = 0;
-			}
-			let totalPeers = getUniqueCount(peerArr) + reduceCount;
-			resolve(totalPeers)
-	})
+
+async function getPeerList(torrent) {
+	let peerArr = [];
+	let extraCount = [];
+	for (let i = 0; i < torrent.announce.length; i++) {
+		if (torrent.announce[i].includes("udp://")) {
+			extraCount.push(doAnnounceGetPeersUDP(torrent.infoHash, torrent.announce[i]))
+			totalCount++;
+		} else if (torrent.announce[i].includes("http://") || torrent.announce[i].includes("https://")) {
+			peerArr.push(doAnnounceGetPeers(torrent.encodedInfoHash, torrent.announce[i]))
+			totalCount++;
+		} else {
+			console.log(`${torrent.announce[i]}: Unknown tracker type! Skipping`)
+		}
+	}
+	[peerArr = await Promise.all(peerArr), extraCount = await Promise.all(extraCount)];
+	let reduceCount;
+	try {
+		reduceCount = extraCount.reduce((a, v) => a + v)
+	} catch(e) {
+		reduceCount = 0;
+	}
+	let totalPeers = getUniqueCount(peerArr) + reduceCount;
+	return totalPeers
 }
 
 function getUniqueCount(peers) {
@@ -45,40 +43,37 @@ function getUniqueCount(peers) {
 	return peers.length
 }
 
-function doAnnounceGetPeers(hash, tracker) {
-	return new Promise ((resolve, reject) => {
-		try {
-			let default_qs = "&peer_id=12345678901234567890&port=1&uploaded=0&downloaded=0&left=0&event=started&compact=1&numwant=1000&ip=172.16.0.1"
-			let req = request({
-				url: `${tracker}?info_hash=${hash}${default_qs}`,
-				method: "GET",
-				encoding: null,
-				timeout: config.waitTime
-			}, function(err, res, body) {
-				if (err) {
-					console.log(`Tracker ${tracker} is dead, skipping...`)
-					resolve([]);
-				} else {
-					try {
-						resolve(parsePeers(bencode.decode(body).peers));
-					} catch(e) {
-						resolve([])
-					} 
-				}
-				//console.log(done++ + "/" + totalCount);
-			});
-			req.on('error', function() {
-				resolve([])
-			})
-		} catch(e) {
-			resolve([])
-		} 
-	});
+async function doAnnounceGetPeers(hash, tracker) {
+	try {
+		let default_qs = "&peer_id=12345678901234567890&port=1&uploaded=0&downloaded=0&left=0&event=started&compact=1&numwant=1000&ip=172.16.0.1"
+		let req = request({
+			url: `${tracker}?info_hash=${hash}${default_qs}`,
+			method: "GET",
+			encoding: null,
+			timeout: config.waitTime
+		}, function(err, res, body) {
+			if (err) {
+				console.log(`Tracker ${tracker} is dead, skipping...`)
+				return [];
+			} else {
+				try {
+					return parsePeers(bencode.decode(body).peers);
+				} catch(e) {
+					return []
+				} 
+			}
+			//console.log(done++ + "/" + totalCount);
+		});
+		req.on('error', function() {
+			return [] //Should probably just throw instead for the catch but eh
+		})
+	} catch(e) {
+		return []
+	} 
 }
 
-function doAnnounceGetPeersUDP(hash, tracker) {
-	return new Promise(async (resolve) => {
-		try {
+async function doAnnounceGetPeersUDP(hash, tracker) {
+	try {
 		let preHost = tracker.split("udp://")[1];
 		let host = preHost.split(":")[0];
 		let port = preHost.split(":")[1];
@@ -88,13 +83,12 @@ function doAnnounceGetPeersUDP(hash, tracker) {
 			port = port.split("/")[0];
 		}
 		const udpserver = dgram.createSocket('udp4');
-		resolve(await getPeersCountFromUDPTracker(udpserver, hash, host, port))
+		return await getPeersCountFromUDPTracker(udpserver, hash, host, port)
 		udpserver.close();
 		//console.log(done++ + "/" + totalCount);
-		} catch(e) {
-			resolve(0);
-		}
-	})
+	} catch(e) {
+		return 0;
+	}
 }
 
 function sendUDPPacket(server, buf, host, port) {

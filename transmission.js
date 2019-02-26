@@ -11,22 +11,17 @@ module.exports = {
 	pauseAllSeeding: pauseAllSeeding
 }
 
-function getTorrents() {
-	return new Promise(async (resolve) => {
-		let torrents = await getAllTorrents();
-		resolve(getSimplifiedTorrentInfo(torrents.torrents));
-	})
+async function getTorrents() {
+	let torrents = await getAllTorrents();
+	return getSimplifiedTorrentInfo(torrents.torrents);
 }
 
 async function pauseAll() {
 	console.log("Pausing all torrents...")
-	return new Promise(async(resolve) => {
-		let torrents = await getTorrents();
-		for (let i = 0; i < torrents.length; i++) {
-			await pauseOne(torrents[i])
-		}
-		resolve();
-	})
+	await getTorrents().map(async torrent => {
+		await pauseOne(torrent)
+	});
+	return;
 }
 
 function pauseOne(torrent) {
@@ -40,13 +35,12 @@ function pauseOne(torrent) {
 
 async function resumeAll() {
 	console.log("Resuming all torrents...")
-	return new Promise(async(resolve) => {
-		let torrents = await getTorrents();
-		for (let i = 0; i < torrents.length; i++) {
-			await resumeOne(torrents[i])
+	await getTorrents().map(async torrent => {
+		if (!torrent.isFinished) {
+			await resumeOne(torrent)
 		}
-		resolve();
-	})
+	});
+	return;
 }
 
 function resumeOne(torrent) {
@@ -58,15 +52,12 @@ function resumeOne(torrent) {
 	})
 }
 
-function deleteMany(list) {
-	return new Promise(async (resolve) => {
-		for (let i = 0; i < list.length; i++) {
-			console.log(`Deleting torrent with ID ${list[i].id} for having no peers...`)
-			await deleteOne(list[i]);
-		}
-		resolve();
+async function deleteMany(list) {
+	list.map(async torrent => {
+		console.log(`Deleting torrent with ID ${list[i].id} for having no peers...`);
+		await deleteOne(torrent);
 	})
-
+	return;
 }
 
 function deleteOne(torrent) {
@@ -78,17 +69,14 @@ function deleteOne(torrent) {
 	})
 }
 
-function pauseAllSeeding() {
+async function pauseAllSeeding() {
 	console.log("Pausing all seeding...")
-	return new Promise(async(resolve) => {
-		let torrents = await getTorrents();
-		for (let i = 0; i < torrents.length; i++) {
-			if (torrents[i].isFinished) {
-				await pauseOne(torrents[i])
-			}
+	await getTorrents().map(async torrent => {
+		if (torrent.isFinished) {
+			await pauseOne(torrent)
 		}
-		resolve();
-	})
+	});
+	return;
 }
 
 function getAllTorrents() {
@@ -109,29 +97,23 @@ function setTorrentPosition(id, pos) {
 }
 
 function getSimplifiedTorrentInfo(torrents) {
-	let simple = [];
-	for (let i = 0; i < torrents.length; i++) {
-		simple.push({
-			magnet: torrents[i].magnetLink,
-			id: torrents[i].id
-		})
-	}
+	let simple = torrents.map(torrent => {
+		return {magnet: torrent.magnetLink, id: torrent.id}
+	})
 	return simple;
 }
 
 async function sortQueue(order) {
-	let promises = [];
-	for (let i = 0; i < order.length; i++) {
-		console.log(`Setting torrent ID ${order[i].id} to queue position ${i}`)
-		promises.push(setTorrentPosition(order[i].id, i))
-	}
-	promises = await Promise.all(promises);
-	//Clean up promises so we only emit errors
-	promises = promises.filter(a => typeof a !== "undefined")
-	if (promises.length === 0) {
+
+	let done = Promise.all(order.map((torrent, pos) => {
+		console.log(`Setting torrent ID ${torrent.id} to queue position ${pos}`)
+		return setTorrentPosition(torrent.id, pos)
+	})).filter(a => typeof a !== "undefined");
+
+	if (done.length === 0) {
 		console.log("No errors sorting queue")
 	} else {
 		console.log("Got some errors sorting queue")
-		console.log(promises)
+		console.log(done)
 	}
 }
